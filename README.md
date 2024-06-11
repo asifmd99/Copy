@@ -280,3 +280,48 @@ public class FileWatcherApplication implements CommandLineRunner {
         }
     }
 }
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.List;
+
+public class LogFileWatcher {
+
+    private static final String LOG_FILE_PATH = "/path/to/your/logfile.log"; // Update this path to your log file
+
+    public static void main(String[] args) {
+        Path logFilePath = Paths.get(LOG_FILE_PATH);
+        Path logDir = logFilePath.getParent();
+        String logFileName = logFilePath.getFileName().toString();
+
+        try (WatchService watchService = FileSystems.getDefault().newWatchService()) {
+            logDir.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+
+            System.out.println("Watching log file for changes: " + LOG_FILE_PATH);
+
+            while (true) {
+                WatchKey key = watchService.take();
+
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+
+                    if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        Path changed = (Path) event.context();
+                        if (changed.endsWith(logFileName)) {
+                            List<String> lines = Files.readAllLines(logFilePath);
+                            if (!lines.isEmpty()) {
+                                String lastLine = lines.get(lines.size() - 1);
+                                System.out.println("New log entry: " + lastLine);
+                            }
+                        }
+                    }
+                }
+                boolean valid = key.reset();
+                if (!valid) {
+                    break;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
