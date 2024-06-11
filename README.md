@@ -369,3 +369,48 @@ public class NonBlockingFileWriter {
         }
     }
 }
+import java.io.IOException;
+import java.nio.file.*;
+import java.security.SecureRandom;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class NonBlockingFileWriterNIO {
+
+    private static final String FILE_PATH = "output.txt";
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int STRING_LENGTH = 10;
+
+    public static void main(String[] args) {
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        Runnable task = () -> {
+            CompletableFuture.runAsync(() -> {
+                String randomString = generateRandomString(STRING_LENGTH);
+                appendToFile(randomString);
+            });
+        };
+
+        scheduler.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private static String generateRandomString(int length) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append((char) ('a' + RANDOM.nextInt(26)));
+        }
+        return sb.toString();
+    }
+
+    private static void appendToFile(String text) {
+        Path path = Paths.get(FILE_PATH);
+        try {
+            Files.write(path, (text + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            System.out.println("Appended: " + text);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
