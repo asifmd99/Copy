@@ -1,4 +1,4 @@
-import java.io.BufferedWriter;
+ooimport java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -414,3 +414,89 @@ public class NonBlockingFileWriterNIO {
         }
     }
 }
+                                       Demo - Phase 1
+—------------------------------------------------------------------------------------------------------------------
+what happens when we run a springboot application?
+
+– searches main method - runs application - @SpringBootApplication has @Configuration@EnableAutoConfiguration, and @ComponentScan
+
+The SpringApplication class sets up the default configuration, creates the Spring application context, and triggers the auto-configuration and component scanning.
+
+SpringBoot creates an appropriate ApplicationContext instance (AnnotationConfigServletWebServerApplicationContext for web applications).
+It registers all @Configuration classes and performs a component scan to identify Spring-managed components (@Component, @Service, @Repository, @Controller, etc.).
+
+Prepares the environment like Properties, configuration
+Any ApplicationListener and ApplicationContextInitializer beans are detected and invoked. These are used to customize the application context before the beans are loaded.
+Spring Boot’s @EnableAutoConfiguration triggers auto-configuration classes, which automatically configure various components (like data sources, JPA, security, etc.) based on the available classpath dependencies and properties.
+Bean Initialization:
+The Spring container starts to create and initialize beans as defined by the configuration and component classes. This involves dependency injection, managing bean life cycles, and invoking any bean post-processors.Dependency Injection: Spring Boot manages dependencies using the IoC (Inversion of Control) container, injecting dependencies where needed, typically through constructor injection, field injection, or setter injection.
+If it's a web application, an embedded web server (like Tomcat, Jetty, or Undertow) is started. The server listens for incoming HTTP requests and routes them to appropriate handlers (controllers).
+Spring Boot detects any beans implementing ApplicationRunner or CommandLineRunner and executes their run methods. This is typically used for executing code after the application context has been initialized.
+—-------------------------------------------------------------
+Why watchService is best for monitoring file updates ?
+
+The WatchService API in Java NIO (New I/O) is particularly well-suited for monitoring file updates and changes in a directory.
+
+Efficiency:
+Low CPU Usage: WatchService is event-driven and does not require constant polling, leading to lower CPU usage compared to traditional polling methods.
+Resource Utilization: Since it relies on the operating system's native event notification mechanisms, it efficiently uses system resources.
+Resource Efficiency:OS LEVEL NOTIFICATION
+Unlike polling, which continuously checks the state of files and directories, WatchService waits for the operating system to notify it of changes. This results in lower CPU usage and more efficient resource management.
+No Configuration required unlike library
+Concurrency:
+Non-Blocking Operations: The asynchronous nature allows other parts of the application to continue running without waiting for file events, improving the overall responsiveness and throughput.
+
+The program enters a loop where it waits for events. The watchService.take() method blocks until an event is available.
+
+
+Cons-Complexity:
+Platform-Specific Limitations:
+Inconsistent Support: While WatchService works on multiple platforms, the underlying file notification mechanisms may have limitations or bugs specific to certain operating systems or configurations.
+Different Behaviors: The behavior of file system notifications can vary between operating systems, which might lead to inconsistent application behavior across platforms.
+Scalability:Monitoring very large directories with many files can become resource-intensive and may result in a high volume of events, which can be challenging to manage efficiently.
+
+—-------------------------------------------------------------------
+Blocking Vs Non Blocking
+Blocking and non-blocking operations are fundamental concepts in concurrent programming, particularly in the context of threads.
+
+Blocking operations cause the calling thread to wait until the operation completes. During this waiting period, the thread is essentially idle and cannot perform any other tasks.
+Thread Waits:
+When a thread performs a blocking operation (e.g., reading from a file, waiting for network data, acquiring a lock), it is put into a waiting state until the operation finishes.
+The thread is not available to execute other tasks during this time.
+While waiting, the thread consumes system resources, particularly memory. This can be inefficient if many threads are blocked simultaneously.
+In high-concurrency environments (like web servers), too many blocked threads can exhaust system resources (e.g., thread pool limits).
+
+Non-blocking operations allow a thread to initiate an operation and immediately proceed with other tasks. The completion of the operation is typically handled through callbacks, futures, or polling mechanisms.
+—------------------------------------------------------------
+
+Concurrency and Scalability:
+Non-blocking operations are essential for building highly concurrent and scalable applications. They allow a small number of threads to handle many tasks efficiently.
+what will happen when both write and read operations are going on a file using 2 programs if we use blocking vs if we use nonBlocking?
+Write Operation (Blocking):
+Program 1 writes to the file using blocking I/O (e.g., BufferedWriter.write()). The program will block (wait) until the entire write operation is completed.
+During this time, the file is often locked by the operating system to prevent concurrent modifications, depending on the file system and OS settings.
+If the file is locked for writing by Program 1, Program 2 may be blocked from reading until the write operation is complete. This depends on the file system's locking policy.
+Data Consistency: There might be inconsistencies or partial reads if Program 2 starts reading while Program 1 is in the middle of writing, especially if the write operation is not atomic.
+Performance Impact: Both programs can be delayed due to blocking. Program 2 might wait for Program 1 to finish writing, and Program 1 might be blocked again if it tries to write while Program 2 is reading.
+Non Blocking
+Concurrency: Both programs can perform their tasks concurrently without waiting for the other to finish. This can significantly improve performance and responsiveness.
+
+Atomicity and Locking:
+Blocking I/O: File systems often lock files during blocking write operations to ensure atomicity, but this can lead to contention and delays.
+Non-Blocking I/O: Locks are not typically used, allowing higher concurrency but requiring the application to manage potential data races and inconsistencies.
+—------------------------------------------------------------------
+How kafka starts?
+—---------------------------------------------------------------
+Use Cases:
+Real-time Analytics: Stream consumers are used in applications where immediate insights or actions are required based on incoming data (e.g., fraud detection, real-time monitoring).
+Event-driven Architectures: Stream processing is integral to event-driven architectures where events trigger responses or actions in real-time.
+IoT Data Processing: Stream processing is common in IoT applications to handle high volumes of sensor data and make timely decisions based on sensor readings.
+—---------------------------------------
+Why kafka and not db
+Concurrency and Scalability:
+Locking: Traditional databases may face issues with locking and concurrency when handling high volumes of real-time data updates and queries simultaneously.
+Scaling Challenges: Scaling traditional databases horizontally can be complex and expensive compared to horizontally scalable messaging systems like Kafka.
+Latency and Performance:
+Query Overhead: Databases may introduce overhead in query processing and transaction management, affecting real-time performance requirements.
+Indexing: Real-time queries may require extensive indexing and optimization to achieve low-latency responses, which can be challenging to maintain at scale.
+
