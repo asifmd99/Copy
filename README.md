@@ -1,4 +1,4 @@
-ooimport java.io.BufferedWriter;
+niooimport java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -500,3 +500,43 @@ Latency and Performance:
 Query Overhead: Databases may introduce overhead in query processing and transaction management, affecting real-time performance requirements.
 Indexing: Real-time queries may require extensive indexing and optimization to achieve low-latency responses, which can be challenging to maintain at scale.
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+
+@Service
+public class KafkaTopicService {
+
+    @Autowired
+    private KafkaAdmin kafkaAdmin;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    private KafkaConsumerService kafkaConsumerService;
+
+    @Value(value = "${topic.name}")
+    private String topicName;
+
+    @PostConstruct
+    public void resetTopic() throws ExecutionException, InterruptedException {
+        try (AdminClient adminClient = AdminClient.create(kafkaAdmin.getConfig())) {
+            // Delete the topic
+            DeleteTopicsResult deleteTopicsResult = adminClient.deleteTopics(Collections.singletonList(topicName));
+            deleteTopicsResult.all().get();
+
+            // Recreate the topic
+            adminClient.createTopics(Collections.singleton(new NewTopic(topicName, 1, (short) 1))).all().get();
+
+            // Start Kafka consumer
+            kafkaConsumerService.startConsuming();
+        }
+    }
+}
