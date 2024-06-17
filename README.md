@@ -540,3 +540,23 @@ public class KafkaTopicService {
         }
     }
 }
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppStartupConfig {
+
+    @Autowired
+    private KafkaTopicService kafkaTopicService;
+
+    @Bean
+    public ApplicationRunner runner() {
+        return args -> {
+            kafkaTopicService.resetTopic();
+            // Any additional startup logic can be added here
+        };
+    }
+}
+
