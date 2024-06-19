@@ -79,9 +79,11 @@ kafka commid id stuff
 consumerconfig values
 Group was my group - client.id = consumer-myGroup-1
 Kafka commiitid,consumerconfig
+-------------------------------------
+Delete zip  delete .idea files 
 --------------------------- 1--------------------------
-Remove kafka--  - Create a new file class - account and site class
-                -  Test soap url 
+Remove kafka--  - Create a new file  without mongo Example - class account and site class
+                -  Test soap url - how to put headers in place
                 -  directly store to mongoDb 
                 -  Check if its working
                 -  Integrate kafka
@@ -90,9 +92,63 @@ Check week3day4 updated on week5day2
 
 --------------------------------------------
 
-Create 3 test files - one with kafka example and other without kafka Example  no mongodb in both
+Create 5 test files - one with kafka example and other without kafka Example  no mongodb in both
 ----------------------------------------
 Try checking for making configuration of both kafka Producer and consumer,
 ---------------------------------------
+if nothing works delete Gradle  file then Restartv
+-----------------------------------
+Where to integrate kafka Streams
+-----------------------------------------------------------------------------------------------------------------------------
+how groupid in kafka consumer works what will happen if 2 kafka listener listening to same topic with same group id and function parameters
+Key Points
+Parallel Consumption: The two listeners (listen1 and listen2) will consume messages in parallel, each handling different partitions of the topic.
+No Message Duplication: Each message will be consumed by only one of the listeners, ensuring no duplication within the consumer group.
+Load Balancing: Kafka will balance the load between the two listeners, distributing the partitions equally (as much as possible).
+Fault Tolerance: If one listener stops, the remaining listener will take over its partitions, ensuring continuous message consumption.
 
+--------------------------------------------------------------------------------------------------------------------------
+if 2 differenet function parameter same topic same group
+ create a custom deserialiser class 
+import org.apache.kafka.common.serialization.Deserializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.Map;
+
+public class CustomDeserializer implements Deserializer<Object> {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+        // Configure the deserializer if needed
+    }
+
+    @Override
+    public Object deserialize(String topic, byte[] data) {
+        try {
+            // Deserialize based on some logic, such as a class type indicator
+            String content = new String(data);
+            if (content.startsWith("{")) {
+                // Assuming JSON object, change MyClass to your target class
+                return objectMapper.readValue(data, MyClass.class);
+            } else {
+                return content;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error deserializing message", e);
+        }
+    }
+
+    @Override
+    public void close() {
+        // Close resources if needed
+    }
+}
+Behavior of Kafka Listeners with Different Parameters
+Message Handling:
+
+Each listener will receive messages according to the deserialization logic.
+listenWithString will receive messages that can be deserialized into a String.
+listenWithObject will receive messages that can be deserialized into MyClass.
+When Kafka listeners have different function parameters but share the same group.id, they will consume messages from the same topic based on the partition assignment by Kafka. Each listener will handle messages according to its deserialization logic and expected parameter type. Proper configuration of deserialization and message format is essential to ensure that each listener can process the messages it receives.
