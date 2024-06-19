@@ -72,3 +72,4 @@ public class KafkaConsumerService {
 
 
 ---------------HOw to configure kafka  for multiple type of  serialiser deserialiser
+Understand grouping in kafka consumer 
