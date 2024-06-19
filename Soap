@@ -73,3 +73,9 @@ public class KafkaConsumerService {
 
 ---------------HOw to configure kafka  for multiple type of  serialiser deserialiser
 Understand grouping in kafka consumer 
+---------------Flow ----------
+ AdminClientConfig values: 
+kafka commid id stuff
+consumerconfig values
+Group was my group - client.id = consumer-myGroup-1
+Kafka commiitid,consumerconfig
