@@ -79,3 +79,20 @@ kafka commid id stuff
 consumerconfig values
 Group was my group - client.id = consumer-myGroup-1
 Kafka commiitid,consumerconfig
+--------------------------- 1--------------------------
+Remove kafka--  - Create a new file class - account and site class
+                -  Test soap url 
+                -  directly store to mongoDb 
+                -  Check if its working
+                -  Integrate kafka
+------------------------2---------------------
+Check week3day4 updated on week5day2 
+
+--------------------------------------------
+
+Create 3 test files - one with kafka example and other without kafka Example  no mongodb in both
+----------------------------------------
+Try checking for making configuration of both kafka Producer and consumer,
+---------------------------------------
+
+
