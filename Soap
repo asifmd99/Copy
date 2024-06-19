@@ -145,6 +145,43 @@ public class CustomDeserializer implements Deserializer<Object> {
         // Close resources if needed
     }
 }
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+@EnableKafka
+public class KafkaConsumerConfig {
+
+    private final String bootstrapServers = "localhost:9092";
+    private final String groupId = "my-group-id";
+
+    @Bean
+    public ConsumerFactory<String, Object> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, CustomDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+}
+
 Behavior of Kafka Listeners with Different Parameters
 Message Handling:
 
@@ -152,3 +189,10 @@ Each listener will receive messages according to the deserialization logic.
 listenWithString will receive messages that can be deserialized into a String.
 listenWithObject will receive messages that can be deserialized into MyClass.
 When Kafka listeners have different function parameters but share the same group.id, they will consume messages from the same topic based on the partition assignment by Kafka. Each listener will handle messages according to its deserialization logic and expected parameter type. Proper configuration of deserialization and message format is essential to ensure that each listener can process the messages it receives.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+for 2 types of object in kafka consumer
+
+ChatGPT
+To handle multiple types of objects in a Kafka consumer, you can implement a dynamic deserialization strategy that differentiates between the types of messages based on some metadata (like headers) or content structure. Here’s how you can achieve this in a Spring Boot application using Apache Kafka:
