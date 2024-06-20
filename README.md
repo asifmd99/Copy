@@ -559,4 +559,19 @@ public class AppStartupConfig {
         };
     }
 }
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.codehaus.mojo:jaxb2-maven-plugin:2.5.0'
+    }
+}
+
+apply plugin: 'java'
+
+generateJaxb {
+    source = file("src/main/resources/xsd")
+    outputDirectory = file("src/main/java")
+}
 
