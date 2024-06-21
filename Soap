@@ -459,3 +459,20 @@ compileJava {
 tasks.named('test') {
     useJUnitPlatform()
 }
+task generateWsdlClasses(type: JavaExec) {
+    description = 'Generate Java classes from WSDL URL'
+    group = 'build'
+    doFirst {
+        project.mkdir(jaxwsSourceDir)
+    }
+    classpath = configurations.jaxws
+    main = 'com.sun.tools.ws.WsImport'
+    args = [
+        '-keep',
+        '-s', jaxwsSourceDir,
+        '-d', jaxwsSourceDir,
+        '-p', 'com.example.consumingwebservice.wsdl',
+        '-Xnocompile',
+        'http://localhost:8080/ws/countries.wsdl'
+    ]
+}
