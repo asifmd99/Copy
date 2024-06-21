@@ -357,5 +357,43 @@ compileJava {
 
 
 
+plugins {
+    id 'java'
+    id 'org.unbroken-dome.xjc' version '2.0.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'com.sun.xml.bind:jaxb-core:2.3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:2.3.2'
+    implementation 'javax.activation:activation:1.1.1'
+}
+
+xjc {
+    // Define a task to generate Java classes from XSD
+    generate {
+        source = fileTree('src/main/resources/xsd') {
+            include '**/*.xsd'
+        }
+        targetPackage = 'com.example.generated'  // Package for generated classes
+        outputDirectory = file("$buildDir/generated-sources/xjc")
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "$buildDir/generated-sources/xjc"
+        }
+    }
+}
+
+compileJava {
+    dependsOn xjcGenerate
+}
 
 
