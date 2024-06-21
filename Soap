@@ -224,7 +224,32 @@ WebServiceTemplate: Simplifies sending and receiving SOAP messages.
 Service Layer: Separates concerns and improves reusability and testability.
 Kafka Listener: Enables asynchronous processing and decouples producers from consumers.
 
-	
+	plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+    implementation 'org.jvnet.jaxb2_commons:jaxb2-basics-ant:1.11.1'
+}
+
+task xjc(type: JavaExec) {
+    main = 'com.sun.tools.xjc.XJCFacade'
+    classpath = configurations.compile + configurations.compileOnly
+    args = [
+        '-d', 'src/main/java',
+        '-p', 'com.example.generated',  // Package for generated classes
+        'src/main/resources/schema.xsd'
+    ]
+}
+
+compileJava.dependsOn xjc
+
 
 
 
