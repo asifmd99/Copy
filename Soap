@@ -250,6 +250,30 @@ task xjc(type: JavaExec) {
 
 compileJava.dependsOn xjc
 
+plugins {
+    id 'java'
+    id 'org.unbroken-dome.xjc' version '2.0.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+}
+
+xjc {
+    javaGen {
+        schemaFiles = fileTree('src/main/resources') {
+            include 'schema.xsd'
+        }
+        outputDirectory = file('src/main/java')
+        packageName = 'com.example.generated'  // Package for generated classes
+    }
+}
+
 
 
 
