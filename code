@@ -1,0 +1,83 @@
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
+import org.springframework.ws.context.MessageContext;
+import org.springframework.ws.soap.SoapMessage;
+import org.springframework.ws.transport.WebServiceMessageSender;
+import org.springframework.ws.transport.http.HttpComponentsMessageSender;
+
+import java.io.IOException;
+
+@Configuration
+public class SoapClientConfig {
+
+    @Bean
+    public Jaxb2Marshaller marshaller() {
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setContextPath("com.example.generated"); // Set the root package of your generated classes
+        return marshaller;
+    }
+
+    @Bean
+    public WebServiceTemplate webServiceTemplate(Jaxb2Marshaller marshaller) {
+        WebServiceTemplate template = new WebServiceTemplate();
+        template.setMarshaller(marshaller);
+        template.setUnmarshaller(marshaller);
+
+        // Add an interceptor to log request and response
+        template.setInterceptors(new ClientInterceptor[]{new SoapRequestResponseInterceptor()});
+
+        // Optionally, set a message sender (e.g., for HTTP)
+        template.setMessageSender(webServiceMessageSender());
+
+        return template;
+    }
+
+    @Bean
+    public WebServiceMessageSender webServiceMessageSender() {
+        return new HttpComponentsMessageSender(); // Use HTTP message sender (can be customized)
+    }
+
+    // Custom interceptor to log SOAP request and response
+    private static class SoapRequestResponseInterceptor implements ClientInterceptor {
+
+        @Override
+        public boolean handleRequest(MessageContext messageContext) throws IOException {
+            logMessage("SOAP Request Message:", messageContext.getRequest());
+            return true;
+        }
+
+        @Override
+        public boolean handleResponse(MessageContext messageContext) throws IOException {
+            logMessage("SOAP Response Message:", messageContext.getResponse());
+            return true;
+        }
+
+        @Override
+        public boolean handleFault(MessageContext messageContext) throws IOException {
+            logMessage("SOAP Fault Message:", messageContext.getResponse());
+            return true;
+        }
+
+        @Override
+        public void afterCompletion(MessageContext messageContext, Exception ex) throws IOException {
+            // Do nothing
+        }
+
+        private void logMessage(String logMessage, Object message) throws IOException {
+            if (message instanceof SoapMessage) {
+                SoapMessage soapMessage = (SoapMessage) message;
+                try {
+                    StringWriter writer = new StringWriter();
+                    soapMessage.writeTo(writer);
+                    System.out.println(logMessage);
+                    System.out.println(writer.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+}
