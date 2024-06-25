@@ -81,3 +81,37 @@ public class SoapClientConfig {
         }
     }
 }
+import com.example.generated.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.ws.client.core.WebServiceTemplate;
+
+@Service
+public class SoapClientService {
+
+    private final WebServiceTemplate webServiceTemplate;
+
+    @Autowired
+    public SoapClientService(WebServiceTemplate webServiceTemplate) {
+        this.webServiceTemplate = webServiceTemplate;
+    }
+
+    public ResponseType sendSoapRequest(RequestType request) {
+        // Replace "RequestType" and "ResponseType" with your actual generated request and response types
+        ObjectFactory factory = new ObjectFactory();
+        
+        // Create a JAXBElement from the request object
+        JAXBElement<RequestType> requestElement = factory.createYourRequestType(request);
+        
+        // Set the endpoint URL of the SOAP service
+        String endpointUrl = "http://your-soap-service-url";
+        
+        // Make the actual call and cast the response to your response type
+        JAXBElement<ResponseType> responseElement = (JAXBElement<ResponseType>) webServiceTemplate.marshalSendAndReceive(endpointUrl, requestElement);
+        
+        // Process the response as needed
+        ResponseType response = responseElement.getValue();
+        
+        return response;
+    }
+}
