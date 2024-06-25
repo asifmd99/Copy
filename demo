@@ -171,3 +171,26 @@ Thank you for your attention. I hope this presentation has provided you with val
 **End of Speech**
 
 Thank you!
+### Slide 10: Benefits
+
+---
+
+#### **Benefits**
+
+**Speech:**
+"There are several benefits to this system. First, real-time monitoring provides immediate insights, which are crucial for quick decision-making. By enriching log entries using the SOAP API, we ensure comprehensive data availability, enhancing the value of the logged information. Additionally, Kafka and MongoDB are robust technologies that handle large volumes of data, ensuring the system's scalability. The system's flexibility allows for the easy addition of more data sources or processing steps as needed, making it adaptable to future requirements."
+
+---
+
+### Slide 11: Challenges and Solutions
+
+---
+
+#### **Challenges and Solutions**
+
+**Speech:**
+"While developing this system, we faced a few challenges. Handling large log files and ensuring data consistency were major concerns. To address these, we implemented efficient log file reading techniques and leveraged Kafka's partitioning and replication features. Integrating the SOAP API required careful handling to ensure data integrity and maintain high performance. Scaling the system was also a significant challenge, but we effectively used MongoDB sharding to distribute the data, ensuring both scalability and reliability."
+
+---
+
+These slides effectively highlight the benefits and challenges faced during the development of the real-time log processing system, offering insights into how each aspect was addressed to create a robust and scalable solution.
