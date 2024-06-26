@@ -115,3 +115,16 @@ public class SoapClientService {
         return response;
     }
 }
+import org.springframework.core.convert.converter.Converter;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.Date;
+
+public class XMLGregorianCalendarToDateConverter implements Converter<XMLGregorianCalendar, Date> {
+    @Override
+    public Date convert(XMLGregorianCalendar source) {
+        if (source == null) {
+            return null;
+        }
+        return source.toGregorianCalendar().getTime();
+    }
+}
