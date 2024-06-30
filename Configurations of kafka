@@ -176,4 +176,42 @@ public class KafkaConsumerService {
     // Similar listeners for orders and payments topics
 }
 
--------------------------------------------------------
+-----------------------Differnt way of consuming messages-
+first - use object message and instanceof keyword  ,same topic and groupid and use conditional statement
+2nd- use filtering logic in kafka consumer factory config code
+Message Filtering: Uses RecordFilterStrategy to filter and route messages to appropriate listeners.
+
+@Configuration
+@EnableKafka
+public class KafkaConsumerConfig {
+
+    @Bean
+    public ConsumerFactory<String, Object> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "group-C");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class.getName());
+        props.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setRecordFilterStrategy(record -> {
+            // Example filtering logic based on headers or payload
+            if (record.value() instanceof Order) {
+                return false; // do not filter
+            } else if (record.value() instanceof Payment) {
+                return false; // do not filter
+            }
+            return true; // filter other messages
+        });
+        return factory;
+    }
+}
+
