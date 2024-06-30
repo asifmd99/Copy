@@ -40,3 +40,18 @@ Kafka topics are divided into multiple partitions to allow parallel processing a
 The key of a Kafka message determines which partition the message will be sent to. Kafka uses a partitioning strategy to map the key to a specific partition.
 By default, Kafka uses a hash of the key to determine the partition.
 This ensures that all messages with the same key are sent to the same partition, which can be crucial for maintaining the order of messages.
+By using a key, you can ensure that all messages related to the same entity
+(e.g., all events for a particular user or account) are processed in order, because they will all go to the same partition.
+Load Balancing:
+ex-This ensures that each message is likely to be distributed across different partitions because each message gets a unique key.
+For use cases where related messages need to be sent to the same partition,
+a more meaningful key should be used (e.g., user ID, account ID, etc.).
+
+use case-Suppose you have a topic for user events where different types of events (login, logout, update profile) are produced for each user.
+Using the user ID as the key ensures that all events for a particular user are sent to the same partition and processed in order.
+-------------------------UUID----------------
+UUID stands for Universally Unique Identifier.
+-------------Kafka template config -------------
+This is an object that holds configuration properties for Kafka, usually sourced from the application's configuration files 
+(like application.yml or application.properties).
+These properties might include broker addresses, client IDs, security settings, etc.
