@@ -1,0 +1,179 @@
+https://chatgpt.com/share/431dce37-f0b4-4070-a065-7973249f0ce2
+
+---------------------kafka consumer factory----------------
+package com.example.demo.config;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@EnableKafka
+@Configuration
+public class KafkaConsumerConfig {
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    // Consumer configuration for group "transaction-group"
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory1() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "transaction-group");
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory1() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory1());
+        return factory;
+    }
+
+    // Consumer configuration for group "order-group"
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory2() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "order-group");
+        configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(configProps);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory2() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory2());
+        return factory;
+    }
+}
+----------------Kafka producer config----------------
+// src/main/java/com/example/demo/config/KafkaProducerConfig.java
+package com.example.demo.config;
+
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@Configuration
+public class KafkaProducerConfig {
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+----------------------------------------------------------
+For Sending message at a particular partition
+package com.example.demo.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.stereotype.Service;
+
+@Service
+public class KafkaConsumerService {
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
+
+    // Listener for "transactions" topic
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "transactions", partitions = {"0"}), groupId = "transaction-group")
+    public void consumeTransactionPartition0(String message) {
+        logger.info("Consumed message in transaction-group from partition 0: {}", message);
+    }
+
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "transactions", partitions = {"1"}), groupId = "transaction-group")
+    public void consumeTransactionPartition1(String message) {
+        logger.info("Consumed message in transaction-group from partition 1: {}", message);
+    }
+
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "transactions", partitions = {"2"}), groupId = "transaction-group")
+    public void consumeTransactionPartition2(String message) {
+        logger.info("Consumed message in transaction-group from partition 2: {}", message);
+    }
+
+    // Similar listeners for orders and payments topics
+}
+----------------------------------------------------
+package com.example.demo.service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.PartitionOffset;
+import org.springframework.kafka.annotation.TopicPartition;
+import org.springframework.stereotype.Service;
+
+@Service
+public class KafkaConsumerService {
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
+
+    // Listener for "transactions" topic
+    @KafkaListener(
+        topicPartitions = @TopicPartition(
+            topic = "transactions",
+            partitionOffsets = { @PartitionOffset(partition = "0", initialOffset = "0") }
+        ),
+        groupId = "transaction-group"
+    )
+    public void consumeTransactionPartition0(String message) {
+        logger.info("Consumed message in transaction-group from partition 0: {}", message);
+    }
+
+    @KafkaListener(
+        topicPartitions = @TopicPartition(
+            topic = "transactions",
+            partitionOffsets = { @PartitionOffset(partition = "1", initialOffset = "0") }
+        ),
+        groupId = "transaction-group"
+    )
+    public void consumeTransactionPartition1(String message) {
+        logger.info("Consumed message in transaction-group from partition 1: {}", message);
+    }
+
+    @KafkaListener(
+        topicPartitions = @TopicPartition(
+            topic = "transactions",
+            partitionOffsets = { @PartitionOffset(partition = "2", initialOffset = "0") }
+        ),
+        groupId = "transaction-group"
+    )
+    public void consumeTransactionPartition2(String message) {
+        logger.info("Consumed message in transaction-group from partition 2: {}", message);
+    }
+
+    // Similar listeners for orders and payments topics
+}
+
+-------------------------------------------------------
