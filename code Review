@@ -149,6 +149,21 @@ They will process the same messages but manage their offsets separately.
 ----------------------
 
 
+@Service
+public class KafkaProducerService {
+
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    public void sendOrder(Order order) {
+        kafkaTemplate.send("orders", order.getOrderId(), order);
+    }
+
+    public void sendPayment(Payment payment) {
+        kafkaTemplate.send("orders", payment.getPaymentId(), payment);
+    }
+}
+
 
  @KafkaListener(topics = "orders", groupId = "group-C", containerFactory = "kafkaListenerContainerFactory")
     public void consume(Object message) {
