@@ -238,3 +238,95 @@ public class PollingAgent {
 ```
 
 In this revised description, the polling agent is now event-driven, using the `WatchService` API to monitor the log file for changes. When changes are detected, it processes the new entries accordingly. This approach ensures efficient and real-time monitoring of the log file.
+
+---------------+------
+### 2. Kafka Producer
+
+**Role:**
+The Kafka producer is responsible for sending processed log entries to a Kafka topic. It handles log events, parses them, populates the appropriate Java classes, and constructs Kafka messages with metadata before sending them to the specified topic.
+
+**Functionality:**
+- **Initialization:** Configures the Kafka producer with necessary settings such as bootstrap servers, key serializer, and value serializer.
+- **Log Event Processing:** Splits the log event by a delimiter and sets the field values for either `AccountEvent` or `LongAccountEvent` based on the size of the split data.
+- **Message Building:** Creates a message builder, adds metadata, and constructs the Kafka message.
+- **Message Production:** Sends the constructed message to the specified Kafka topic.
+
+**Key Methods:**
+- `configureProducer()`: Sets up the producer configurations.
+- `processLogEvent(String logEvent)`: Processes the log event, splits it, populates the appropriate Java class, and builds the Kafka message.
+- `sendMessage(String topic, String message)`: Sends a constructed message to the specified Kafka topic.
+
+**Example Code Snippet:**
+
+```java
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
+
+import java.util.Properties;
+
+public class LogKafkaProducer {
+
+    private KafkaProducer<String, String> producer;
+
+    public void configureProducer() {
+        Properties props = new Properties();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        producer = new KafkaProducer<>(props);
+    }
+
+    public void processLogEvent(String logEvent) {
+        String delimiter = "|";
+        String[] parts = logEvent.split(delimiter);
+
+        if (parts.length == expectedLengthForAccountEvent()) {
+            AccountEvent event = new AccountEvent();
+            event.setField1(parts[0]);
+            event.setField2(parts[1]);
+            // Set other fields...
+
+            String message = buildMessage(event);
+            sendMessage("account_topic", message);
+
+        } else if (parts.length == expectedLengthForLongAccountEvent()) {
+            LongAccountEvent event = new LongAccountEvent();
+            event.setField1(parts[0]);
+            event.setField2(parts[1]);
+            // Set other fields...
+
+            String message = buildMessage(event);
+            sendMessage("long_account_topic", message);
+        }
+    }
+
+    private String buildMessage(Object event) {
+        // Convert the event object to a JSON string (or other format) and add metadata
+        String metadata = "meta_data";
+        return metadata + "|" + event.toString();
+    }
+
+    private void sendMessage(String topic, String message) {
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, message);
+        producer.send(record);
+    }
+
+    private int expectedLengthForAccountEvent() {
+        return 5; // Replace with actual length
+    }
+
+    private int expectedLengthForLongAccountEvent() {
+        return 10; // Replace with actual length
+    }
+}
+```
+
+**Explanation:**
+- **Initialization:** The `configureProducer()` method sets up the Kafka producer with necessary configurations.
+- **Log Event Processing:** The `processLogEvent(String logEvent)` method processes log events. It splits the log event string by the delimiter, checks the size of the resulting array, and sets the fields of either `AccountEvent` or `LongAccountEvent` accordingly.
+- **Message Building:** The `buildMessage(Object event)` method constructs the message string by combining metadata with the event's string representation.
+- **Message Production:** The `sendMessage(String topic, String message)` method sends the constructed message to the specified Kafka topic.
+
+By providing this detailed description, readers will understand how the Kafka producer processes log events, populates the appropriate Java classes, builds messages with metadata, and sends them to Kafka topics.
