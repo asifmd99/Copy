@@ -155,3 +155,86 @@ MongoDB is used to store the enriched log entries.
 5. **MongoDB Storage:** The enriched data is then stored in MongoDB for further use and analysis.
 
 By providing these detailed descriptions, anyone reading the documentation will have a clear understanding of each component's role and how they interact within the system.
+
+_----------------------------------------
+### 1. Polling Agent
+
+**Role:**
+The polling agent is responsible for monitoring the log file for any updates using an event-driven approach. It uses a watch service to detect changes to the log file and triggers appropriate actions when updates are detected.
+
+**Functionality:**
+- **Initialization:** Sets up the necessary environment, initializes configurations, and prepares the watch service to monitor the log file.
+- **Watch Service:** Utilizes Java's `WatchService` API to monitor the log file for any modifications, such as new entries.
+- **Event Handling:** When a change is detected, the watch service triggers an event, and the polling agent processes the new log entries.
+
+**Key Methods:**
+- `initialize()`: Sets up configurations and prepares the agent.
+- `setupWatchService()`: Configures and initializes the watch service to monitor the log file.
+- `handleWatchEvent(WatchEvent<?> event)`: Processes the event triggered by the watch service when a change is detected in the log file.
+- `processLogEntry(LogEntry entry)`: Processes each new log entry detected by the watch service.
+
+**Example Code Snippet:**
+
+```java
+import java.nio.file.*;
+import java.io.IOException;
+
+public class PollingAgent {
+
+    private WatchService watchService;
+    private Path logFilePath;
+
+    public void initialize() throws IOException {
+        // Set up configurations
+        setupWatchService();
+    }
+
+    private void setupWatchService() throws IOException {
+        watchService = FileSystems.getDefault().newWatchService();
+        logFilePath = Paths.get("/path/to/log/file");
+        logFilePath.getParent().register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+    }
+
+    public void startMonitoring() {
+        while (true) {
+            WatchKey key;
+            try {
+                key = watchService.take();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+
+            for (WatchEvent<?> event : key.pollEvents()) {
+                handleWatchEvent(event);
+            }
+
+            boolean valid = key.reset();
+            if (!valid) {
+                break;
+            }
+        }
+    }
+
+    private void handleWatchEvent(WatchEvent<?> event) {
+        WatchEvent.Kind<?> kind = event.kind();
+        if (kind == StandardWatchEventKinds.OVERFLOW) {
+            return;
+        }
+
+        WatchEvent<Path> ev = (WatchEvent<Path>) event;
+        Path filename = ev.context();
+
+        if (filename.equals(logFilePath.getFileName())) {
+            // Process new log entry
+            processLogEntry(/*new log entry*/);
+        }
+    }
+
+    private void processLogEntry(LogEntry entry) {
+        // Process the log entry
+    }
+}
+```
+
+In this revised description, the polling agent is now event-driven, using the `WatchService` API to monitor the log file for changes. When changes are detected, it processes the new entries accordingly. This approach ensures efficient and real-time monitoring of the log file.
