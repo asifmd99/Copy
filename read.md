@@ -72,3 +72,86 @@ Creating comprehensive documentation for your project is essential to ensure tha
 - **Glossary:** Define any terms or acronyms used in the documentation.
 
 By following this structure, you’ll create a comprehensive and well-organized documentation that will help others understand and work with your project effectively.
+
+Sure, here’s a detailed description of each component in your Java polling agent project:
+
+### Components Description
+
+#### 1. Polling Agent
+
+**Role:**  
+The polling agent is responsible for monitoring the log file for updates. It regularly checks for new entries and processes them.
+
+**Functionality:**
+- **Initialization:** Sets up the necessary environment, initializes configurations, and prepares to monitor the log file.
+- **Polling Mechanism:** Periodically reads the log file to detect new entries. This can be done using a scheduled task or a continuous loop with a sleep interval.
+- **Log Processing:** Once new entries are detected, the polling agent processes these entries and prepares them for further handling by other components.
+
+**Key Methods:**
+- `initialize()`: Sets up configurations and prepares the agent.
+- `poll()`: Continuously monitors the log file for new entries.
+- `processLogEntry(LogEntry entry)`: Processes each new log entry.
+
+#### 2. Kafka Producer
+
+**Role:**  
+The Kafka producer is responsible for sending the processed log entries to a Kafka topic.
+
+**Functionality:**
+- **Initialization:** Configures the Kafka producer with the necessary settings such as bootstrap servers, key serializer, and value serializer.
+- **Message Production:** Converts processed log entries into Kafka messages and sends them to the specified Kafka topic.
+
+**Key Methods:**
+- `configureProducer()`: Sets up the producer configurations.
+- `sendMessage(String topic, LogEntry entry)`: Sends a log entry to the specified Kafka topic.
+
+#### 3. Kafka Consumer
+
+**Role:**  
+The Kafka consumer reads messages from the Kafka topic and processes them further by making a SOAP API call to enrich the data.
+
+**Functionality:**
+- **Initialization:** Configures the Kafka consumer with necessary settings such as bootstrap servers, group ID, key deserializer, and value deserializer.
+- **Message Consumption:** Reads messages from the specified Kafka topic.
+- **Data Enrichment:** For each consumed message, makes a SOAP API call to enrich the data with additional information.
+
+**Key Methods:**
+- `configureConsumer()`: Sets up the consumer configurations.
+- `consumeMessages(String topic)`: Reads messages from the specified Kafka topic.
+- `enrichData(LogEntry entry)`: Enriches the log entry data using a SOAP API call.
+
+#### 4. SOAP API Integration
+
+**Role:**  
+The SOAP API is used to enrich the data consumed from Kafka with additional information.
+
+**Functionality:**
+- **API Client Configuration:** Sets up the SOAP client with necessary configurations such as endpoint URL, security settings, and message format.
+- **Data Enrichment:** Sends a request to the SOAP API with the log entry data and processes the response to extract the needed information.
+
+**Key Methods:**
+- `configureSoapClient()`: Sets up the SOAP client configurations.
+- `enrichLogEntry(LogEntry entry)`: Sends a request to the SOAP API and processes the response.
+
+#### 5. MongoDB Storage
+
+**Role:**  
+MongoDB is used to store the enriched log entries.
+
+**Functionality:**
+- **Database Configuration:** Configures the MongoDB connection with necessary settings such as database URL, database name, and collection name.
+- **Data Storage:** Inserts the enriched log entries into the MongoDB collection.
+
+**Key Methods:**
+- `configureMongoDB()`: Sets up the MongoDB configurations.
+- `storeLogEntry(LogEntry entry)`: Inserts an enriched log entry into the MongoDB collection.
+
+### Integration and Workflow
+
+1. **Polling Agent:** The polling agent monitors the log file and detects new entries.
+2. **Kafka Producer:** The new log entries are sent to a Kafka topic by the Kafka producer.
+3. **Kafka Consumer:** The Kafka consumer reads the messages from the Kafka topic.
+4. **SOAP API Integration:** The consumer uses the SOAP API to enrich the data with additional information.
+5. **MongoDB Storage:** The enriched data is then stored in MongoDB for further use and analysis.
+
+By providing these detailed descriptions, anyone reading the documentation will have a clear understanding of each component's role and how they interact within the system.
