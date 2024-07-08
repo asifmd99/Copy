@@ -157,3 +157,13 @@ MongoDB is used to store the enriched log entries.
 5. **MongoDB Storage:** The enriched data is then stored in MongoDB for further use and analysis.
 
 By providing these detailed descriptions, anyone reading the documentation will have a clear understanding of each component's role and how they interact within the system.
+
+Errors may occur while setting up the watch service or processing log entries. These are caught and logged to avoid interrupting the monitoring process.
+
+Message Production: Errors may occur during message construction or sending. These are caught and logged to ensure the producer can continue processing subsequent log events.
+
+Message Consumption and Data Enrichment: Errors may occur during message consumption or while making the SOAP API call for data enrichment. These are caught and logged to ensure the consumer can continue processing subsequent messages
+
+Try-Catch Blocks: Used throughout the code to catch and handle exceptions.
+Logging: Errors are logged using System.err.println and ex.printStackTrace() to provide detailed information about the error.
+Continuity: Ensures that the application can continue running and processing subsequent tasks even when errors occur.
