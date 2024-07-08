@@ -378,3 +378,13 @@ While the current implementation is robust and efficient, there are several enha
 - **Data Visualization:** Implement data visualization tools to provide users with intuitive and interactive ways to explore and analyze the stored log data.
 
 By incorporating these enhancements and improvements, the system can become more scalable, secure, efficient, and user-friendly, better serving the needs of the banking industry and adapting to future requirements.
+
+### Introduction
+
+In the fast-paced world of banking, real-time data processing is crucial for maintaining operational efficiency and gaining valuable insights. To address this need, we have developed a robust Java agent designed to monitor a bank's log file for updates continuously. This agent ensures that any changes to the log file are detected and processed in real-time, enabling immediate action and analysis.
+
+Upon detecting updates, the agent processes these log entries and produces them to a Kafka topic. Kafka, known for its high throughput and low latency, facilitates the efficient and reliable transmission of log data in real-time.
+
+The processed data is then enriched using a SOAP API and stored in MongoDB, a NoSQL database optimized for handling large volumes of unstructured data. This storage solution allows for detailed analytics, reporting, and data-driven decision-making by the bank.
+
+Our solution leverages modern technologies to provide a seamless and efficient way to handle real-time log data, ensuring that the bank can maintain high performance and gain valuable insights from their operational data. This project exemplifies the integration of event-driven architecture, real-time data processing, and scalable data storage to meet the demanding needs of the banking industry.
